@@ -1,12 +1,13 @@
 --!strict
 
 module_container = {}
-alogrithm = require(script.algorithms)
+algorithms = require(script.algorithms)
 
 mainsorterclass = {}
 mainsorterclass.__index = mainsorterclass
 
 -- types
+export type SortingParameterObject
 export type SorterObject = {
 	Ascending: boolean,
 	Algorithm: number,
