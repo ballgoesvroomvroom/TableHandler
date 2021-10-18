@@ -1,7 +1,7 @@
 # Table handler object
 
-An object to carry out array manipulation. \\
-Mainly sorting. \\
+An object to carry out array manipulation.  
+Mainly sorting.  
 For use within Roblox.
 
 ## Types
@@ -28,7 +28,7 @@ Type: [SorterObject]()
 - `.Algorithm`
 	- Default: 1
 	- Type: 4
-	- Desc: Determines the sorting algorithm to use. \\Refer to [List of sorting algorithms]()
+	- Desc: Determines the sorting algorithm to use.  Refer to [List of sorting algorithms]()
 - `.IncludeNonSorted`
 	- Default: true
 	- Type: boolean
@@ -36,11 +36,11 @@ Type: [SorterObject]()
 - `.SortFirstFew`
 	- Default: -1
 	- Type: number
-	- Desc: Determines the amount of elements (it counts non-numerical elements) to sort\\A value of -1 to indicate to sort all the elements in the passed array
+	- Desc: Determines the amount of elements (it counts non-numerical elements) to sort  A value of -1 to indicate to sort all the elements in the passed array
 - `.SortingParameters`
 	- Default: {}
 	- Type: dict
-	- Desc: Stores arguments that sorting functions can use\\Such as the initial pivot, `.Pivot`, when using quicksort algorithm
+	- Desc: Stores arguments that sorting functions can use  Such as the initial pivot, `.Pivot`, when using quicksort algorithm
 
 #### Methods
 | Name | Params | Desc | Returns
