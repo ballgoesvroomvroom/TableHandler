@@ -6,14 +6,32 @@ All sorting functions assume that the array passed contains valid elements.
 All sorted occurs in ascending order.
 --]]
 
-algorithms.LENGTH = 4 -- amount of algorithms
+--algorithms.LENGTH = 6 -- amount of algorithms
+setmetatable(algorithms, {
+	__newindex = function(a, k, v)
+		if k == "LENGTH" then
+			-- to get .LENGTH constant
+			return #a.dir
+		end
+	end
+})
 
 algorithms.dir = {
 	algorithms.bubblesort,
 	algorithms.insertionsort,
 	algorithms.heapsort,
-	algorithms.quicksort
+	algorithms.quicksort,
+	algorithms.mergesort,
+	algorithms.selectionsort
 }
+
+local function __floor(n)
+	if n % 1 > 0 then
+		n = n -(n %1)
+	end
+	return n
+end
+
 function algorithms.distributor(algoNo: number, array, sortingargs)
 	if type(algoNo) ~= "number" or algoNo <= 0 or algoNo > #algorithms.dir then
 		error("Invalid argument passed, 'algoNo', must be a number between 1 and %d (inclusive)":format(#algorithms.dir))
@@ -41,7 +59,7 @@ end
 
 function algorithms.insertionsort(array, _)
 	for x = 2, #array do
-		y = x -1
+		y = x -1z
 		while y > 0 and array[y] < array[x] do
 			array[y +1] = array[y]
 			y = y - 1
@@ -55,7 +73,13 @@ local function __heapify(array, n, i)
 	local largest = i
 	local l = 2 *i
 	local r = 2 *i +1
-
+    
+    if l <= n and r <= n then
+        -- both child exists
+        if array[l] < array[r] then
+            array[r], array[l] = array[l], array[r]
+        end
+    end
 	if l <= n and array[l] > array[largest] then
 		-- right child node exists
 		largest = l
@@ -68,20 +92,26 @@ local function __heapify(array, n, i)
 	if largest ~= i then
 		array[i], array[largest] = array[largest], array[i]
 		__heapify(array, n, largest)
+	else
+		-- done
 	end
 end
 function algorithms.heapsort(array)
 	n = #array
 
-	for i = n//2, 1, -1 do
+	for i = __floor(n/2), 1, -1 do
 		__heapify(array, n, i)
 	end
-
+	
+	local stored = {}
 	for i = n, 2, -1 do
-		array[i], array[1] = array[1], array[i]
+	    table.insert(stored, 1, array[1]) -- insert at the very front
+	    n = n - 1
+
+	    array[1] = array[i]
 		__heapify(array, n, 1)
 	end
-	return array
+	return stored
 end
 
 local function __getpartition(l, h, array, pivot)
@@ -114,8 +144,8 @@ local function __quicksort(l, h, array, startingpivot)
 	if l < h then
 		local initial, j = __getpartition(l, h, array, startingpivot)
 		if not (initial == j) then
-			__quicksort(l, j, array)
-			__quicksort(j +1, h, array)
+			__quicksort(l, j, array) -- left side
+			__quicksort(j +1, h, array) -- right side
 		else
 			-- sorted
 			--print("sorted already")
@@ -139,4 +169,33 @@ function algorithms.quicksort(array, args)
 	return array
 end
 
+local function __mergesort(l, h, array)
+	if l < h then
+		local m = __floor((l +h)/2)
+		__mergesort(l, m, array) -- left side
+		__mergesort(m +1, h, array) -- right side
+
+		local i, j = 1, 1
+		while true do
+			continue
+		end
+	end
+end
+
+function algorithms.mergesort(array, _)
+
+end
+
+function algorithms.selectionsort(array, _)
+	for a = 1, #array do
+		local smallest_index = a
+		for b = 1 +a -1, #array do
+			if array[b] < array[smallest_index] then
+				smallest_index = b
+			end
+		end
+		array[a], array[smallest_index] = array[smallest_index], array[a]
+	end
+	return array
+end
 return algorithms

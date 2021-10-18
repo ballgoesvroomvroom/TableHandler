@@ -152,8 +152,12 @@ function mainsorterclass:Concat(a, b, modify_array)
 	return new
 end
 
-function mainsorterclass:Randomise(array, seed)
+function mainsorterclass:Randomise(array, seed: number)
 	-- randomises the array
+end
+
+function mainsorterclass:Shift(array, c: number)
+	
 end
 
 function mainsorterclass:Sort(array)
