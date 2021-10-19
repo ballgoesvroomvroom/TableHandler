@@ -221,22 +221,36 @@ function mainsorterclass:__recurse_array(array)
 	local ToAppend = {}
 
 	for _, v in pairs(array) do
-		if type(v) == "table" then
-			self:__recurse_array(v)
-		elseif type(v) ~= "number" then
-			table.insert(ToAppend, v)
-		else
+		if type(v) == "number" and (iteration_limit == nil or iteration_limit > 0) then
 			table.insert(ToSort, v)
+		elseif type(v) == "table" then
+			table.insert(ToAppend, self:__recurse_array(v))
+		else
+			table.insert(ToAppend, v)
+		end
+		if iteration_limit ~= nil then
+			iteration_limit = iteration_limit - 1
 		end
 	end
-end
 
+	local SortedList = algorithm.distributor(self.Algorithm, ToSort, self.SortingParameters)
+	if not self.Ascending then
+		-- SortedList is in Ascending
+		SortedList = self:Flip(SortedList)
+	end
+	if self.IncludeNonSorted then
+		-- Appends ToAppend to SortedList
+		ToSort = self:Concat(ToSort, ToAppend, true)
+	end
+	return ToSort
+end
 
 function mainsorterclass:DeepSort(array)
 	-- takes in an array where there are nested arrays
 	-- i.e, array = {3, 1, 5, 10, {1, 3, 10, 5, 4, {4, 3, 1, 2}}}
 	-- return = {1, 3, 5, 10, {1, 3, 4, 5, 10, {1, 2, 3, 4}}}
-	local master = {} -- stores all the results
+	-- index of nested arrays are maintained
+	return self:__recurse_array(array)
 end
 
 return module_container

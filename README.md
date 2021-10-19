@@ -22,7 +22,7 @@ Passed arrays are not modified directly; instead a new array with a new memory a
 4. Quick sort
 	- Extra params:
 		- `.Pivot`: Determines the starting pivot when beginning the first recursion
-5. Merge sort
+5. Merge sort [W.I.P]
 	- Extra params: None
 6. Selection sort
 	- Extra params: None

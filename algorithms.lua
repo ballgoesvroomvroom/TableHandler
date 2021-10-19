@@ -21,7 +21,7 @@ algorithms.dir = {
 	algorithms.insertionsort,
 	algorithms.heapsort,
 	algorithms.quicksort,
-	algorithms.mergesort,
+	--algorithms.mergesort,
 	algorithms.selectionsort
 }
 
@@ -169,6 +169,7 @@ function algorithms.quicksort(array, args)
 	return array
 end
 
+""" Work in progress
 local function __mergesort(l, h, array)
 	if l < h then
 		local m = __floor((l +h)/2)
@@ -181,10 +182,10 @@ local function __mergesort(l, h, array)
 		end
 	end
 end
-
 function algorithms.mergesort(array, _)
 
 end
+"""
 
 function algorithms.selectionsort(array, _)
 	for a = 1, #array do
