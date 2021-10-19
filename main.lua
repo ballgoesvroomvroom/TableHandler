@@ -157,7 +157,31 @@ function mainsorterclass:Randomise(array, seed: number)
 end
 
 function mainsorterclass:Shift(array, c: number)
-	
+	-- positive c to shift all elements to the right
+
+	local n = #array
+	local true_shift = c % n
+	if true_shift == 0 then
+		-- no shift
+		return array
+	end
+	if c < 0 then
+		-- shift left as c is negative
+		true_shift = true_shift * -1
+	end
+
+	local new_array = {}
+	for i = 1, n do
+		local old_pos = i - true_shift
+		if old_pos <= 0 then
+			old_pos = n + old_pos
+		elseif old_pos > n then
+			old_pos = old_pos - n
+		end
+
+		table.insert(new_array, array[old_pos])
+	end
+	return new_array
 end
 
 function mainsorterclass:Sort(array)
