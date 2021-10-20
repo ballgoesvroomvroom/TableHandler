@@ -12,6 +12,17 @@ In this document, both the terms `array` and `table` are used interchangeably lo
 
 Parameters with an asterisk (*) before their names are optional, they already have a default value
 
+
+
+## Table of contents
+
+- [Types](https://github.com/ballgoesvroomvroom/TableHandler#types)
+- [List of sorting algorithms](https://github.com/ballgoesvroomvroom/TableHandler#list-of-sorting-algorithms)
+- [Algorithms' performances](https://github.com/ballgoesvroomvroom/TableHandler#algorithms-performances)
+- [Functions](https://github.com/ballgoesvroomvroom/TableHandler#functions)
+- [Class](https://github.com/ballgoesvroomvroom/TableHandler#class)
+- [Examples](https://github.com/ballgoesvroomvroom/TableHandler#examples)
+
 ## Types
 
 #### - [TableHandlerObject](https://github.com/ballgoesvroomvroom/TableHandler#tablehandlerobject)
@@ -34,40 +45,99 @@ Parameters with an asterisk (*) before their names are optional, they already ha
 5. Selection sort
    - Extra params: None
 
+
+
+## Algorithms' performances
+
+There are 3 different sizes of datasets that I have benchmarked<br />
+Big:    10, 000 items<br />
+Medium: 2000 items<br />
+Small:  100 items<br />
+
+A total of 100 datasets per sizes were used and the average was taken<br />
+
+### Bubble sort
+
+Time taken to sort each dataset:<br />
+
+| Small   | Medium   | Big      |
+| ------- | -------- | -------- |
+| 0.664ms | 0.7949ms | 25.362ms |
+
+### Insertion sort
+
+Time taken to sort each dataset:<br />
+
+| Small   | Medium | Big     |
+| ------- | ------ | ------- |
+| 0.617ms | 0.847  | 0.842ms |
+
+### Heap sort
+
+Time taken to sort each dataset:<br />
+
+| Small   | Medium  | Big     |
+| ------- | ------- | ------- |
+| 0.602ms | 0.692ms | 1.693ms |
+
+### Quick sort
+
+Time taken to sort each dataset:<br />
+
+| Small | Medium  | Big      |
+| ----- | ------- | -------- |
+| 0.575 | 0.750ms | 14.470ms |
+
+### Selection sort
+
+Time taken to sort each dataset:<br />
+
+| Small   | Medium  | Big      |
+| ------- | ------- | -------- |
+| 0.802ms | 0.763ms | 16.737ms |
+
+#### [Code used to benchmark](https://github.com/ballgoesvroomvroom/TableHandler/blob/main/benchmarking.lua)
+
+
+
 ## Functions
 
-### `.new()` - Creates a new [TableHandlerObject](https://github.com/ballgoesvroomvroom/TableHandler#tablehandlerobject)
+### `.new()`
 
 #### Parameters:
 
-| Name                                                         | Desc                                                    |
-| ------------------------------------------------------------ | ------------------------------------------------------- |
-| *Properties: [TableHandlerObjectProperties](https://github.com/ballgoesvroomvroom/TableHandler#--tablehandlerobjectproperties) | An array containing the TableHandlerObject's properties |
+​	- *properties: [TableHandlerObjectProperties](https://github.com/ballgoesvroomvroom/TableHandler#--tablehandlerobjectproperties)
 
-#### Returns
+#### Description:
 
-A [TableHandlerObject](https://github.com/ballgoesvroomvroom/TableHandler#tablehandlerobject)
+​	 Creates a new [TableHandlerObject](https://github.com/ballgoesvroomvroom/TableHandler#tablehandlerobject)
 
-### `.getver()` - Returns the version of the current module in the format, `major.minor.patch`
+#### Returns:
 
-#### Parameters
+​	[TableHandlerObject](https://github.com/ballgoesvroomvroom/TableHandler#tablehandlerobject)
 
-| Name          | Desc                                                         |
-| ------------- | ------------------------------------------------------------ |
-| *type: string | Determines the value to return, either 'major', 'minor' or 'patch' |
+### `.getver()`
 
-#### Returns
+#### Parameters:
 
-String
+ - *typ: string -- Determines the value to return, either 'major', 'minor' or 'patch'
+
+#### Description:
+
+​	Returns the version of the current module in the format, `major.minor.patch`
+
+#### Returns:
+
+​	String
 
 ## Class
 
 ### `TableHandlerObject`
 
 Type: [TableHandlerObject](https://github.com/ballgoesvroomvroom/TableHandler#--tablehandlerobject)
-Note: Read only table, cannot modify properties by indexing it, use `:WriteProperties()` method instead
+Note: Modify properties using simple indexing will call [:WriteProperties()](https://github.com/ballgoesvroomvroom/TableHandler#writeproperties)
 
-#### Properties
+#### Properties:
 
 - `.Ascending`
   - Default: true
@@ -94,7 +164,7 @@ Note: Read only table, cannot modify properties by indexing it, use `:WritePrope
   - Type: [SortingParameterObject](https://github.com/ballgoesvroomvroom/TableHandler#--sortingparameterobject)
   - Desc: Stores arguments that sorting functions can use\Such as the initial pivot, `.Pivot`, when using quicksort algorithm
 
-#### Methods
+#### Methods:
 
 ##### `:GetProperties()`
 
@@ -512,57 +582,6 @@ Output:
 {1, 3, 6, "a", {2, 5, 8, "b", {2, 4}, "c"}, "d", {5, 2, 3}}
 {1, 3, 6, {2, 5, 8, {2, 4}}}
 ```
-
-## Algorithms' performances
-
-There are 3 different sizes of datasets that I have benchmarked<br />
-Big:    10, 000 items<br />
-Medium: 2000 items<br />
-Small:  100 items<br />
-
-A total of 100 datasets per sizes were used and the average was taken<br />
-
-### Bubble sort
-
-Time taken to sort each dataset:<br />
-
-| Small   | Medium   | Big      |
-| ------- | -------- | -------- |
-| 0.664ms | 0.7949ms | 25.362ms |
-
-### Insertion sort
-
-Time taken to sort each dataset:<br />
-
-| Small   | Medium | Big     |
-| ------- | ------ | ------- |
-| 0.617ms | 0.847  | 0.842ms |
-
-### Heap sort
-
-Time taken to sort each dataset:<br />
-
-| Small   | Medium  | Big     |
-| ------- | ------- | ------- |
-| 0.602ms | 0.692ms | 1.693ms |
-
-### Quick sort
-
-Time taken to sort each dataset:<br />
-
-| Small | Medium  | Big      |
-| ----- | ------- | -------- |
-| 0.575 | 0.750ms | 14.470ms |
-
-### Selection sort
-
-Time taken to sort each dataset:<br />
-
-| Small   | Medium  | Big      |
-| ------- | ------- | -------- |
-| 0.802ms | 0.763ms | 16.737ms |
-
-#### [Code used to benchmark](https://github.com/ballgoesvroomvroom/TableHandler/blob/main/benchmarking.lua)
 
 ---
 
