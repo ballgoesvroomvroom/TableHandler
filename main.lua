@@ -14,6 +14,7 @@ export type TableHandlerObject = {
 	Ascending: boolean,
 	Algorithm: number,
 	IncludeNonSorted: boolean,
+	ModifyArray: boolean,
 	SortFirstFew: number,
 	SortingParameters: SortingParameterObject
 }
@@ -21,7 +22,7 @@ export type TableHandlerObject = {
 module_container.ver = {
 	major = 0,
 	minor = 1,
-	patch = 0
+	patch = 1
 }
 
 local function __FillTableHandlerObjectParams(): TableHandlerObject
@@ -29,6 +30,7 @@ local function __FillTableHandlerObjectParams(): TableHandlerObject
 		Ascending = true,
 		Algorithm = 1,
 		IncludeNonSorted = true,
+		ModifyArray = false,
 		SortFirstFew = -1,
 		SortingParameters = {
 			Pivot = nil
@@ -108,15 +110,14 @@ function tablehandlerclass:GetProperties()
 end
 
 function tablehandlerclass:WriteProperties(properties)
-	print("called with", properties)
-	if properties.Ascending then
+	if properties.Ascending ~= nil then
 		if not __type_check(properties.Ascending, "boolean") then
 			warn(".Ascending value must be a boolean")
 		else
 			self.Ascending = properties.Ascending
 		end
 	end
-	if properties.Algorithm then
+	if properties.Algorithm ~= nil then
 		if not __type_check(properties.Algorithm, "number") then
 			warn(".Algorithm value must be a number")
 		elseif not __inrange_check(properties.Algorithm, 0, algorithms.LENGTH, "11") then
@@ -125,14 +126,21 @@ function tablehandlerclass:WriteProperties(properties)
 			self.Algorithm = properties.Algorithm
 		end
 	end
-	if properties.IncludeNonSorted then
+	if properties.IncludeNonSorted ~= nil then
 		if not __type_check(properties.IncludeNonSorted, "boolean") then
 			warn(".IncludeNonSorted value must be a boolean")
 		else
 			self.IncludeNonSorted = properties.IncludeNonSorted
 		end
 	end
-	if properties.SortFirstFew then
+	if properties.ModifyArray ~= nil then
+		if not __type_check(properties.ModifyArray, "boolean") then
+			warn(".ModifyArray value must be a boolean")
+		else
+			self.ModifyArray = properties.ModifyArray
+		end
+	end
+	if properties.SortFirstFew ~= nil then
 		if not __type_check(properties.SortFirstFew, "number") then
 			warn(".SortFirstFew must be a number")
 		else
@@ -145,10 +153,18 @@ function tablehandlerclass:Flip(array)
 	-- flips/reverse the array
 	-- i.e, array = {3, 1, 5, 10}, return = {10, 5, 1, 3}
 	-- NOTE: Modifies the actual array passed as an argument
-	for i = 1, __floor(#array/2) do
-		array[i], array[#array -i +1] = array[#array -i +1], array[i]
+	if not self.ModifyArray then
+		local a = {}
+		for i = #array, 1, -1 do
+			table.insert(a, array[i])
+		end
+		return a
+	else
+		for i = 1, __floor(#array/2) do
+			array[i], array[#array -i +1] = array[#array -i +1], array[i]
+		end
+		return array
 	end
-	return array
 end
 
 function tablehandlerclass:Slice(array, s: number, e: number, ...)
@@ -171,10 +187,10 @@ function tablehandlerclass:Slice(array, s: number, e: number, ...)
 
 	-- to handle negative indexes
 	if type(s) == "number" and s <= -1 then
-		s = #array + i + 1
+		s = #array + s + 1
 	end
 	if type(e) == "number" and e <= -1 then
-		e = #array + i + 2
+		e = #array + e + 1
 	end
 
 	if (s == nil or type(s) ~= "number") then
@@ -206,18 +222,12 @@ function tablehandlerclass:Slice(array, s: number, e: number, ...)
 	return re
 end
 
-function tablehandlerclass:Concat(a, b, ...)
+function tablehandlerclass:Concat(a, b)
 	-- concatenate two arrays, a and b
 	-- i.e, a = {3, 1}, b = {3, 5}, return = {3, 1, 3, 5}
 	-- if modify_array is false, it will create a new table
-	local arg = {...}
-	local modify_array = true
-	if #arg >= 1 and arg[1] and type(arg[1]) == "boolean" then
-		modify_array = arg[1]
-	end
-
 	local new = {}
-	if modify_array then
+	if self.ModifyArray then
 		new = a
 	else
 		for i = 1, #a do
@@ -269,7 +279,7 @@ function tablehandlerclass:Sort(array)
 
 	local iteration_limit
 	if self.SortFirstFew > 0 then
-		iteration_limit = __floor(self.SortFirstFew/1)
+		iteration_limit = self.SortFirstFew
 	end
 
 	for _, v in pairs(array) do
@@ -283,7 +293,6 @@ function tablehandlerclass:Sort(array)
 		end
 	end
 
-	print(self)
 	local SortedList = algorithms.distributor(self.Algorithm, ToSort, self.SortingParameters)
 	if not self.Ascending then
 		-- SortedList is in Ascending
@@ -304,13 +313,13 @@ function tablehandlerclass:__recurse_array(array)
 
 	local iteration_limit
 	if self.SortFirstFew > 0 then
-		iteration_limit = __floor(self.SortFirstFew/1)
+		iteration_limit = self.SortFirstFew
 	end
 
 	for _, v in pairs(array) do
 		if type(v) == "number" and (iteration_limit == nil or iteration_limit > 0) then
 			table.insert(ToSort, v)
-		elseif type(v) == "table" then
+		elseif type(v) == "table" and (iteration_limit == nil or iteration_limit > 0) then
 			table.insert(ToInsert, self:__recurse_array(v))
 			table.insert(ToInsertIndex, #ToAppend +1)
 		else
