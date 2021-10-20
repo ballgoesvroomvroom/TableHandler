@@ -3,14 +3,14 @@
 local module_container = {}
 local algorithms = require(script.algorithms)
 
-local mainsorterclass = {}
-mainsorterclass.__index = mainsorterclass
+local tablehandlerclass = {}
+tablehandlerclass.__index = tablehandlerclass
 
 -- types
 export type SortingParameterObject = {
 	Pivot: number
 }
-export type SorterObject = {
+export type TableHandlerObject = {
 	Ascending: boolean,
 	Algorithm: number,
 	IncludeNonSorted: boolean,
@@ -18,7 +18,13 @@ export type SorterObject = {
 	SortingParameters: SortingParameterObject
 }
 
-local function __FillSorterObjectParams(): SorterObject
+module_container.ver = {
+	major = 0,
+	minor = 1,
+	patch = 0
+}
+
+local function __FillTableHandlerObjectParams(): TableHandlerObject
 	return {
 		Ascending = true,
 		Algorithm = 1,
@@ -65,22 +71,44 @@ end
 
 
 function module_container.new(...)
-	local x: SorterObject = __FillSorterObjectParams()
-	setmetatable(x, mainsorterclass)
+	local x: TableHandlerObject = __FillTableHandlerObjectParams()
+	setmetatable(x, tablehandlerclass)
 
-	if {...}[1] ~= nil then
-		x:WriteProperties({...}[1])
+	local arg = {...}
+	if arg[1] ~= nil then
+		x:WriteProperties(arg[1])
 	end
 	return setmetatable({}, { -- read-only table
 		__index = x,
-		__newindex = function(...)
-			error("SorterObject properties are read-only, cannot be overwritten. To overwrite properties, use the :WriteProperties() method")
-		end),
+		__newindex = function(_, k, v)
+			x:WriteProperties({[k] = v})
+			-- error("TableHandlerObject properties are read-only, cannot be overwritten. To overwrite properties, use the :WriteProperties() method")
+		end,
 		__metatable = "READ-ONLY; Do not attempt to change the metatable"
 		})
 end
 
-function mainsorterclass:WriteProperties(properties)
+function module_container.getver(...)
+	local arg = {...}
+	local key = arg[1] -- key = "major", "minor", or "patch"
+	if module_container.ver[key] ~= nil then
+		return module_container.ver[key]
+	else
+		return tostring(module_container.ver.major).."."..tostring(module_container.ver.minor).."."..tostring(module_container.ver.patch)
+	end
+end
+
+function tablehandlerclass:GetProperties()
+	-- since values are hidden in the proxy table returned by module_container.new() (print(tablehandlerclass) outputs {}), need a method to retrieve all properties
+	local list_of_properties = __FillTableHandlerObjectParams()
+	for k, v in pairs(list_of_properties) do
+		list_of_properties[k] = self[k]
+	end
+	return list_of_properties
+end
+
+function tablehandlerclass:WriteProperties(properties)
+	print("called with", properties)
 	if properties.Ascending then
 		if not __type_check(properties.Ascending, "boolean") then
 			warn(".Ascending value must be a boolean")
@@ -113,7 +141,7 @@ function mainsorterclass:WriteProperties(properties)
 	end
 end
 
-function mainsorterclass:Flip(array)
+function tablehandlerclass:Flip(array)
 	-- flips/reverse the array
 	-- i.e, array = {3, 1, 5, 10}, return = {10, 5, 1, 3}
 	-- NOTE: Modifies the actual array passed as an argument
@@ -123,20 +151,52 @@ function mainsorterclass:Flip(array)
 	return array
 end
 
-function mainsorterclass:Slice(array, s: number, e: number, step: number)
+function tablehandlerclass:Slice(array, s: number, e: number, ...)
 	-- s = start, must be positive
 	-- e = end, must be positive
-	-- step = step value, must be positive
+	-- step = step value, must be positive, (defualt = 1)
 	-- will slice beginning from the start(inclusive) and ending before end value
 	-- will return a new array, leaving the passed array(argument) un-modified
+	local arg = {...}
+	local step = 1
+	if #arg >= 1 and type(arg[1]) == "number" then
+		step = arg[1]
+	end
+
+	local n = #array
+	if n == 0 then
+		-- array is empty, return immediately
+		return array
+	end
+
+	-- to handle negative indexes
+	if type(s) == "number" and s <= -1 then
+		s = #array + i + 1
+	end
+	if type(e) == "number" and e <= -1 then
+		e = #array + i + 2
+	end
+
 	if (s == nil or type(s) ~= "number") then
 		error("Start value must be a number")
 	elseif (e == nil or type(e) ~= "number") then
 		error("End value must be a number")
-	elseif (step == nil or type(step) ~= "number") then
+	elseif type(step) ~= "number" then
 		error("Step value must be a number")
-	elseif s <= 0 or e <= 0 or step <= 0 then
-		error("Start, end, step values must all be positive (> 0)")
+	elseif s == 0 or e == 0 or step == 0 then
+		error("Start, end, step values cannot be zero")
+	elseif s > #array or e > #array +1 then -- +1 because it needs a margin of 1 extra index to slice fully till the end of the array
+		error(("Start, end values must be within %d and %d (inclusive)"):format(#array *-1, #array))
+	elseif step >= 1 then
+		-- start must be smaller than end
+		if s > e then
+			error("Start value cannot be greater than end value with a positive step value")
+		end
+	elseif step <= -1 then
+		-- start value must be greater than end as it traverses right to left
+		if s < e then
+			error("Start value cannot be smaller than end value with a negative step value")
+		end
 	end
 
 	local re = {}
@@ -146,12 +206,14 @@ function mainsorterclass:Slice(array, s: number, e: number, step: number)
 	return re
 end
 
-function mainsorterclass:Concat(a, b, modify_array)
+function tablehandlerclass:Concat(a, b, ...)
 	-- concatenate two arrays, a and b
 	-- i.e, a = {3, 1}, b = {3, 5}, return = {3, 1, 3, 5}
 	-- if modify_array is false, it will create a new table
-	if modify_array == nil then
-		modify_array = true -- default value
+	local arg = {...}
+	local modify_array = true
+	if #arg >= 1 and arg[1] and type(arg[1]) == "boolean" then
+		modify_array = arg[1]
 	end
 
 	local new = {}
@@ -168,12 +230,13 @@ function mainsorterclass:Concat(a, b, modify_array)
 	return new
 end
 
-function mainsorterclass:Randomise(array, seed: number)
+function tablehandlerclass:Randomise(array, seed: number)
 	-- randomises the array
 end
 
-function mainsorterclass:Shift(array, c: number)
+function tablehandlerclass:Shift(array, c: number)
 	-- positive c to shift all elements to the right
+	-- negative to do likewise
 
 	local n = #array
 	local true_shift = c % n
@@ -200,7 +263,7 @@ function mainsorterclass:Shift(array, c: number)
 	return new_array
 end
 
-function mainsorterclass:Sort(array)
+function tablehandlerclass:Sort(array)
 	local ToSort = {}
 	local ToAppend = {} -- to store the non numerical values
 
@@ -233,8 +296,10 @@ function mainsorterclass:Sort(array)
 	return ToSort
 end
 
-function mainsorterclass:__recurse_array(array)
+function tablehandlerclass:__recurse_array(array)
 	local ToSort = {}
+	local ToInsert = {} -- store nested sorted arrays here
+	local ToInsertIndex = {} -- store nested sorted arrays' index here; when inserting `ToInsert` into `ToAppend` if `.IncludeNonSorted` is true
 	local ToAppend = {}
 
 	local iteration_limit
@@ -246,7 +311,8 @@ function mainsorterclass:__recurse_array(array)
 		if type(v) == "number" and (iteration_limit == nil or iteration_limit > 0) then
 			table.insert(ToSort, v)
 		elseif type(v) == "table" then
-			table.insert(ToAppend, self:__recurse_array(v))
+			table.insert(ToInsert, self:__recurse_array(v))
+			table.insert(ToInsertIndex, #ToAppend +1)
 		else
 			table.insert(ToAppend, v)
 		end
@@ -262,12 +328,17 @@ function mainsorterclass:__recurse_array(array)
 	end
 	if self.IncludeNonSorted then
 		-- Appends ToAppend to SortedList
+		for elementIndex, insertIndex in pairs(ToInsertIndex) do
+			table.insert(ToAppend, insertIndex, ToInsert[elementIndex])
+		end
 		ToSort = self:Concat(ToSort, ToAppend, true)
+	else
+		ToSort = self:Concat(ToSort, ToInsert, true)
 	end
 	return ToSort
 end
 
-function mainsorterclass:DeepSort(array)
+function tablehandlerclass:DeepSort(array)
 	-- takes in an array where there are nested arrays
 	-- i.e, array = {3, 1, 5, 10, {1, 3, 10, 5, 4, {4, 3, 1, 2}}}
 	-- return = {1, 3, 5, 10, {1, 3, 4, 5, 10, {1, 2, 3, 4}}}
