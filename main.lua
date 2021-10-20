@@ -1,21 +1,21 @@
 --!strict
 
-module_container = {}
-algorithms = require(script.algorithms)
+local module_container = {}
+local algorithms = require(script.algorithms)
 
-mainsorterclass = {}
+local mainsorterclass = {}
 mainsorterclass.__index = mainsorterclass
 
 -- types
-export type SortingParameterObject
+export type SortingParameterObject = {
+	Pivot: number
+}
 export type SorterObject = {
 	Ascending: boolean,
 	Algorithm: number,
 	IncludeNonSorted: boolean,
-	SortFirstFew: boolean,
-	SortingParameters: type SortingParameterObject = {
-		Pivot: number
-	}
+	SortFirstFew: number,
+	SortingParameters: SortingParameterObject
 }
 
 local function __FillSorterObjectParams(): SorterObject
@@ -24,11 +24,19 @@ local function __FillSorterObjectParams(): SorterObject
 		Algorithm = 1,
 		IncludeNonSorted = true,
 		SortFirstFew = -1,
-		SortingParameters = {}
+		SortingParameters = {
+			Pivot = nil
+		}
 	}
 end
 
-local function __type_check(var, insisted_type: string)
+local function __floor(n: number)
+	if n % 1 > 0 then
+		n = n -(n %1)
+	end
+	return n
+end
+local function __type_check(var: any, insisted_type: string)
 	return type(var) == insisted_type
 end
 local function __inrange_check(var, min: number, max: number, inclusive: string)
@@ -56,15 +64,23 @@ local function __inrange_check(var, min: number, max: number, inclusive: string)
 end
 
 
-function module_container.new(properties)
+function module_container.new(...)
 	local x: SorterObject = __FillSorterObjectParams()
 	setmetatable(x, mainsorterclass)
 
-	x:OverwriteProperties(properties)
-	return x
+	if {...}[1] ~= nil then
+		x:WriteProperties({...}[1])
+	end
+	return setmetatable({}, { -- read-only table
+		__index = x,
+		__newindex = function(...)
+			error("SorterObject properties are read-only, cannot be overwritten. To overwrite properties, use the :WriteProperties() method")
+		end),
+		__metatable = "READ-ONLY; Do not attempt to change the metatable"
+		})
 end
 
-function mainsorterclass:OverwriteProperties(properties)
+function mainsorterclass:WriteProperties(properties)
 	if properties.Ascending then
 		if not __type_check(properties.Ascending, "boolean") then
 			warn(".Ascending value must be a boolean")
@@ -76,7 +92,7 @@ function mainsorterclass:OverwriteProperties(properties)
 		if not __type_check(properties.Algorithm, "number") then
 			warn(".Algorithm value must be a number")
 		elseif not __inrange_check(properties.Algorithm, 0, algorithms.LENGTH, "11") then
-			warn(".Algorithm value must be within 1 - %d(inclusive)":format(algorithms.LENGTH))
+			warn((".Algorithm value must be within 1 - %d(inclusive)"):format(algorithms.LENGTH))
 		else
 			self.Algorithm = properties.Algorithm
 		end
@@ -101,7 +117,7 @@ function mainsorterclass:Flip(array)
 	-- flips/reverse the array
 	-- i.e, array = {3, 1, 5, 10}, return = {10, 5, 1, 3}
 	-- NOTE: Modifies the actual array passed as an argument
-	for i = 1, #array //2 do
+	for i = 1, __floor(#array/2) do
 		array[i], array[#array -i +1] = array[#array -i +1], array[i]
 	end
 	return array
@@ -190,7 +206,7 @@ function mainsorterclass:Sort(array)
 
 	local iteration_limit
 	if self.SortFirstFew > 0 then
-		iteration_limit = self.SortFirstFew //1
+		iteration_limit = __floor(self.SortFirstFew/1)
 	end
 
 	for _, v in pairs(array) do
@@ -204,7 +220,8 @@ function mainsorterclass:Sort(array)
 		end
 	end
 
-	local SortedList = algorithm.distributor(self.Algorithm, ToSort, self.SortingParameters)
+	print(self)
+	local SortedList = algorithms.distributor(self.Algorithm, ToSort, self.SortingParameters)
 	if not self.Ascending then
 		-- SortedList is in Ascending
 		SortedList = self:Flip(SortedList)
@@ -220,6 +237,11 @@ function mainsorterclass:__recurse_array(array)
 	local ToSort = {}
 	local ToAppend = {}
 
+	local iteration_limit
+	if self.SortFirstFew > 0 then
+		iteration_limit = __floor(self.SortFirstFew/1)
+	end
+
 	for _, v in pairs(array) do
 		if type(v) == "number" and (iteration_limit == nil or iteration_limit > 0) then
 			table.insert(ToSort, v)
@@ -233,7 +255,7 @@ function mainsorterclass:__recurse_array(array)
 		end
 	end
 
-	local SortedList = algorithm.distributor(self.Algorithm, ToSort, self.SortingParameters)
+	local SortedList = algorithms.distributor(self.Algorithm, ToSort, self.SortingParameters)
 	if not self.Ascending then
 		-- SortedList is in Ascending
 		SortedList = self:Flip(SortedList)

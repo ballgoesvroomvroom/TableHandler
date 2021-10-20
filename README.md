@@ -37,6 +37,7 @@ Passed arrays are not modified directly; instead a new array with a new memory a
 ## Class
 ### `SorterObject`
 Type: [SorterObject](https://github.com/ballgoesvroomvroom/TableHandler#--sorterobject)
+Note: Read only table, cannot modify properties by indexing it, use `:WriteProperties()` method instead
 
 #### Properties
 - `.Ascending`
@@ -63,7 +64,7 @@ Type: [SorterObject](https://github.com/ballgoesvroomvroom/TableHandler#--sorter
 #### Methods
 | Name | Params | Desc | Returns
 | ---- | ----| ----| ----|
-| OverwriteProperties | SorterObjectProperties: [SorterObjectProperties](https://github.com/ballgoesvroomvroom/TableHandler#--sorterobjectproperties) | Overwrites the properties for the SorterObject | nil |
+| WriteProperties | SorterObjectProperties: [SorterObjectProperties](https://github.com/ballgoesvroomvroom/TableHandler#--sorterobjectproperties) | Overwrites the properties for the SorterObject | nil |
 | Flip | a: array | Flips/Reverses array 'a' | Returns the flipped array of 'a' | Flipped array of 'a'
 | Slice | a: array, s: number, e: number, step: number | Slices the array starting from s (inclusive) and ending right before e (non-inclusive), step being the step value | Sliced array of 'a'
 | Concat | a: array, b: array | Concatenate the two arrays, 'a' and 'b' | Concatenated array from 'a' and 'b'
