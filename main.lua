@@ -300,9 +300,9 @@ function tablehandlerclass:Sort(array)
 	end
 	if self.IncludeNonSorted then
 		-- Appends ToAppend to SortedList
-		ToSort = self:Concat(ToSort, ToAppend, true)
+		SortedList = self:Concat(SortedList, ToAppend, true)
 	end
-	return ToSort
+	return SortedList
 end
 
 function tablehandlerclass:__recurse_array(array)
@@ -340,11 +340,11 @@ function tablehandlerclass:__recurse_array(array)
 		for elementIndex, insertIndex in pairs(ToInsertIndex) do
 			table.insert(ToAppend, insertIndex, ToInsert[elementIndex])
 		end
-		ToSort = self:Concat(ToSort, ToAppend, true)
+		SortedList = self:Concat(SortedList, ToAppend, true)
 	else
-		ToSort = self:Concat(ToSort, ToInsert, true)
+		SortedList = self:Concat(SortedList, ToInsert, true)
 	end
-	return ToSort
+	return SortedList
 end
 
 function tablehandlerclass:DeepSort(array)
