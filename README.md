@@ -10,7 +10,7 @@ Passed arrays are not modified directly when sorting functions are called; inste
 
 In this document, both the terms `array` and `table` are used interchangeably loosely<br />
 
-Parameters with an asterisk (*) before their names are optional, they already have a default value<br />
+Parameters with an asterisk (*) before their names are optional parameters, they already have a default value<br />
 
 `.Algorithm = 4`; Quicksort algorithm is not fully implemented yet, please refrain from using it at all cost
 
@@ -51,6 +51,7 @@ Parameters with an asterisk (*) before their names are optional, they already ha
 
 ## Algorithms' performances
 
+### Note: Not accurate and not complete!!
 There are 3 different sizes of datasets that I have used to benchmarked<br />
 Big:    10, 000 items<br />
 Medium: 2000 items<br />
